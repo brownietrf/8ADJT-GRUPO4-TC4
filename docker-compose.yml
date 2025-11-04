@@ -1,0 +1,78 @@
+# Docker Compose para desenvolvimento local (opcional)
+# Uso: docker-compose up -d
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database (substitui H2 em desenvolvimento)
+  postgres:
+    image: postgres:15-alpine
+    container_name: feedback-postgres
+    environment:
+      POSTGRES_DB: feedbackdb
+      POSTGRES_USER: feedbackuser
+      POSTGRES_PASSWORD: feedbackpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U feedbackuser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicação Spring Boot
+  api:
+    build: .
+    container_name: feedback-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/feedbackdb
+      SPRING_DATASOURCE_USERNAME: feedbackuser
+      SPRING_DATASOURCE_PASSWORD: feedbackpass
+      CLOUD_FUNCTION_NOTIFICATION_URL: http://notification-function:8081/notify
+      CLOUD_FUNCTION_REPORT_URL: http://report-function:8082/report
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Cloud Function Simulada - Notificação
+  notification-function:
+    build:
+      context: ./cloud-functions/notification-function
+    container_name: feedback-notification
+    ports:
+      - "8081:8081"
+    environment:
+      PORT: 8081
+
+  # Cloud Function Simulada - Relatório
+  report-function:
+    build:
+      context: ./cloud-functions/report-function
+    container_name: feedback-report
+    depends_on:
+      - api
+    ports:
+      - "8082:8082"
+    environment:
+      PORT: 8082
+      API_URL: http://api:8080
+      ADMIN_EMAIL: admin@feedback.com
+      ADMIN_PASSWORD: admin123
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  default:
+    name: feedback-network
