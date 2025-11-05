@@ -136,8 +136,8 @@ Este sistema permite:
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/feedback-system-cloud.git
-cd feedback-system-cloud
+git clone https://github.com/ersmoraes/8ADJT-GRUPO4-TC4.git
+cd 8ADJT-GRUPO4-TC4
 ```
 
 ### 2. Execute a API Spring Boot
@@ -583,7 +583,7 @@ gcloud sql instances patch feedbackdb --activation-policy=NEVER
 ## 📚 Estrutura do Projeto
 
 ```
-feedback-system-cloud/
+8ADJT-GRUPO4-TC4/
 ├── src/main/java/com/feedback/system/
 │   ├── model/              # Entidades JPA
 │   ├── repository/         # Repositórios Spring Data
