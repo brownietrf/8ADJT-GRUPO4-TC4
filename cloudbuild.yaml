@@ -1,53 +1,83 @@
 # ==============================================================================
-# GOOGLE CLOUD BUILD - CI/CD AUTOMÁTICO
+# GOOGLE CLOUD BUILD - PIPELINE COMPLETO
 # ==============================================================================
-# Este arquivo configura o build e deploy automatizado via Cloud Build.
+# Este pipeline realiza deploy de:
+# 1️⃣ Backend (Cloud Run)
+# 2️⃣ Notification Function (Gen2)
+# 3️⃣ Report Function (Gen2)
 #
-# Trigger: git push para branch main
+# Trigger recomendado: push na branch main
+# ==============================================================================
+
+timeout: "1800s"
 
 steps:
-  # Step 1: Build da aplicação Spring Boot com Maven
-  - name: 'maven:3.9-eclipse-temurin-17'
-    entrypoint: 'mvn'
-    args: ['clean', 'package', '-DskipTests']
-    id: 'build-spring-boot'
+# ------------------------------------------------------------------------------
+# 1️⃣ BUILD E DEPLOY BACKEND (CLOUD RUN)
+# ------------------------------------------------------------------------------
+- name: "gcr.io/cloud-builders/docker"
+  id: "build-backend-image"
+  args:
+    - "build"
+    - "-t"
+    - "gcr.io/$PROJECT_ID/feedback-backend"
+    - "."
 
-  # Step 2: Deploy no App Engine
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['app', 'deploy', '--quiet']
-    id: 'deploy-app-engine'
-    waitFor: ['build-spring-boot']
+- name: "gcr.io/cloud-builders/docker"
+  id: "push-backend-image"
+  args:
+    - "push"
+    - "gcr.io/$PROJECT_ID/feedback-backend"
 
-  # Step 3: Deploy da Cloud Function de Notificação
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'functions'
-      - 'deploy'
-      - 'notifyAdmin'
-      - '--runtime=nodejs20'
-      - '--trigger-http'
-      - '--allow-unauthenticated'
-      - '--entry-point=notifyUrgentFeedback'
-      - '--source=cloud-functions/notification-function'
-      - '--region=us-central1'
-    id: 'deploy-notification-function'
+- name: "gcr.io/cloud-builders/gcloud"
+  id: "deploy-backend-cloudrun"
+  args:
+    [
+      "run",
+      "deploy",
+      "feedback-backend",
+      "--image=gcr.io/$PROJECT_ID/feedback-backend",
+      "--region=us-central1",
+      "--platform=managed",
+      "--allow-unauthenticated"
+    ]
 
-  # Step 4: Deploy da Cloud Function de Relatório
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'functions'
-      - 'deploy'
-      - 'generateReport'
-      - '--runtime=nodejs20'
-      - '--trigger-topic=weekly-report'
-      - '--entry-point=generateWeeklyReport'
-      - '--source=cloud-functions/report-function'
-      - '--region=us-central1'
-    id: 'deploy-report-function'
+# ------------------------------------------------------------------------------
+# 2️⃣ DEPLOY NOTIFICATION FUNCTION (GEN2)
+# ------------------------------------------------------------------------------
+- name: "gcr.io/cloud-builders/gcloud"
+  id: "deploy-notification-function"
+  args:
+    [
+      "functions",
+      "deploy",
+      "notifyAdmin",
+      "--gen2",
+      "--runtime=nodejs20",
+      "--region=us-central1",
+      "--trigger-http",
+      "--entry-point=notifyUrgentFeedback",
+      "--allow-unauthenticated",
+      "--source=cloud-functions/notification-function"
+    ]
 
-# Timeout total do build
-timeout: '1800s'
+# ------------------------------------------------------------------------------
+# 3️⃣ DEPLOY REPORT FUNCTION (GEN2)
+# ------------------------------------------------------------------------------
+- name: "gcr.io/cloud-builders/gcloud"
+  id: "deploy-report-function"
+  args:
+    [
+      "functions",
+      "deploy",
+      "generateReport",
+      "--gen2",
+      "--runtime=nodejs20",
+      "--region=us-central1",
+      "--trigger-topic=weekly-report",
+      "--entry-point=generateWeeklyReport",
+      "--source=cloud-functions/report-function"
+    ]
 
-# Logs
 options:
   logging: CLOUD_LOGGING_ONLY

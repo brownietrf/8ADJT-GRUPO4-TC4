@@ -2,6 +2,20 @@
 
 Exemplos práticos de como usar a API do Sistema de Feedbacks.
 
+> **⚙️ Variáveis usadas nos exemplos**
+
+```bash
+BACKEND_URL="https://feedback-backend-385950174704.us-central1.run.app"
+NOTIFY_URL="https://notifyadmin-2onaas43pa-uc.a.run.app"
+REPORT_URL="https://generatereport-2onaas43pa-uc.a.run.app"
+WEEKLY_REPORT_URL="https://generateweeklyreporthttp-2onaas43pa-uc.a.run.app"
+MANUAL_REPORT_URL="https://reporthttp-2onaas43pa-uc.a.run.app"
+```
+
+---
+
+Exemplos práticos de como usar a API do Sistema de Feedbacks.
+
 ---
 
 ## 🔐 Autenticação
@@ -9,7 +23,7 @@ Exemplos práticos de como usar a API do Sistema de Feedbacks.
 ### 1. Login como Aluno
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST $BACKEND_URL/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "maria.silva@aluno.com",
@@ -31,7 +45,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 ### 2. Login como Admin
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST $BACKEND_URL/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@feedback.com",
@@ -49,7 +63,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 # Salve o token em uma variável
 TOKEN="seu_token_aqui"
 
-curl -X POST http://localhost:8080/api/feedbacks \
+curl -X POST $BACKEND_URL/api/feedbacks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{
@@ -65,7 +79,7 @@ curl -X POST http://localhost:8080/api/feedbacks \
 ### 4. Criar Feedback Urgente (Dispara Notificação)
 
 ```bash
-curl -X POST http://localhost:8080/api/feedbacks \
+curl -X POST $BACKEND_URL/api/feedbacks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{
@@ -81,14 +95,14 @@ curl -X POST http://localhost:8080/api/feedbacks \
 ### 5. Listar Meus Feedbacks
 
 ```bash
-curl -X GET http://localhost:8080/api/feedbacks/me \
+curl -X GET $BACKEND_URL/api/feedbacks/me \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 ### 6. Buscar Feedback por ID
 
 ```bash
-curl -X GET http://localhost:8080/api/feedbacks/123e4567-e89b-12d3-a456-426614174000 \
+curl -X GET $BACKEND_URL/api/feedbacks/123e4567-e89b-12d3-a456-426614174000 \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -102,28 +116,28 @@ curl -X GET http://localhost:8080/api/feedbacks/123e4567-e89b-12d3-a456-42661417
 # Use o token do admin
 ADMIN_TOKEN="token_admin_aqui"
 
-curl -X GET http://localhost:8080/api/admin/feedbacks \
+curl -X GET $BACKEND_URL/api/admin/feedbacks \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 ### 8. Listar Feedbacks da Última Semana
 
 ```bash
-curl -X GET "http://localhost:8080/api/admin/feedbacks?lastWeek=true" \
+curl -X GET "$BACKEND_URL/api/admin/feedbacks?lastWeek=true" \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 ### 9. Listar Feedbacks Urgentes
 
 ```bash
-curl -X GET http://localhost:8080/api/admin/feedbacks/urgent \
+curl -X GET $BACKEND_URL/api/admin/feedbacks/urgent \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
 ### 10. Gerar Relatório Semanal (JSON)
 
 ```bash
-curl -X POST http://localhost:8080/api/admin/report/weekly \
+curl -X POST $BACKEND_URL/api/admin/report/weekly \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
@@ -163,7 +177,7 @@ curl -X POST http://localhost:8080/api/admin/report/weekly \
 ### 11. Gerar Relatório Semanal (Texto)
 
 ```bash
-curl -X GET http://localhost:8080/api/admin/report/weekly/text \
+curl -X GET $BACKEND_URL/api/admin/report/weekly/text \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
@@ -197,7 +211,7 @@ Média Geral: 4.20 ⭐
 ### 12. Ver Estatísticas Gerais
 
 ```bash
-curl -X GET http://localhost:8080/api/admin/stats \
+curl -X GET $BACKEND_URL/api/admin/stats \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
@@ -208,7 +222,7 @@ curl -X GET http://localhost:8080/api/admin/stats \
 ### 13. Verificar Status da API
 
 ```bash
-curl -X GET http://localhost:8080/api/auth/health
+curl -X GET $BACKEND_URL/api/auth/health
 ```
 
 **Resposta:**
@@ -219,7 +233,7 @@ Sistema de Feedbacks - Online
 ### 14. Actuator Health
 
 ```bash
-curl -X GET http://localhost:8080/actuator/health
+curl -X GET $BACKEND_URL/actuator/health
 ```
 
 **Resposta:**
@@ -255,7 +269,7 @@ curl -X GET http://localhost:8080/actuator/health
 
 ```bash
 # 1. Login
-RESPONSE=$(curl -s -X POST http://localhost:8080/api/auth/login \
+RESPONSE=$(curl -s -X POST $BACKEND_URL/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "maria.silva@aluno.com", "password": "maria123"}')
 
@@ -263,7 +277,7 @@ TOKEN=$(echo $RESPONSE | grep -o '"token":"[^"]*' | cut -d'"' -f4)
 echo "Token obtido: $TOKEN"
 
 # 2. Criar feedback
-curl -X POST http://localhost:8080/api/feedbacks \
+curl -X POST $BACKEND_URL/api/feedbacks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{
@@ -276,7 +290,7 @@ curl -X POST http://localhost:8080/api/feedbacks \
   }'
 
 # 3. Listar meus feedbacks
-curl -X GET http://localhost:8080/api/feedbacks/me \
+curl -X GET $BACKEND_URL/api/feedbacks/me \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -284,7 +298,7 @@ curl -X GET http://localhost:8080/api/feedbacks/me \
 
 ```bash
 # 1. Login como admin
-ADMIN_RESPONSE=$(curl -s -X POST http://localhost:8080/api/auth/login \
+ADMIN_RESPONSE=$(curl -s -X POST $BACKEND_URL/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "admin@feedback.com", "password": "admin123"}')
 
@@ -292,15 +306,15 @@ ADMIN_TOKEN=$(echo $ADMIN_RESPONSE | grep -o '"token":"[^"]*' | cut -d'"' -f4)
 echo "Token Admin: $ADMIN_TOKEN"
 
 # 2. Ver estatísticas
-curl -X GET http://localhost:8080/api/admin/stats \
+curl -X GET $BACKEND_URL/api/admin/stats \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 
 # 3. Ver feedbacks urgentes
-curl -X GET http://localhost:8080/api/admin/feedbacks/urgent \
+curl -X GET $BACKEND_URL/api/admin/feedbacks/urgent \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 
 # 4. Gerar relatório
-curl -X POST http://localhost:8080/api/admin/report/weekly \
+curl -X POST $BACKEND_URL/api/admin/report/weekly \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 
@@ -311,7 +325,7 @@ curl -X POST http://localhost:8080/api/admin/report/weekly \
 TOKEN="seu_token_aqui"
 
 # 2. Criar feedback urgente (verifique os logs para ver a notificação)
-curl -X POST http://localhost:8080/api/feedbacks \
+curl -X POST $BACKEND_URL/api/feedbacks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{
@@ -334,7 +348,7 @@ curl -X POST http://localhost:8080/api/feedbacks \
 ### Erro 401 - Não Autenticado
 
 ```bash
-curl -X GET http://localhost:8080/api/feedbacks/me
+curl -X GET $BACKEND_URL/api/feedbacks/me
 # Resposta: 401 Unauthorized
 ```
 
@@ -342,7 +356,7 @@ curl -X GET http://localhost:8080/api/feedbacks/me
 
 ```bash
 # Aluno tentando acessar endpoint de admin
-curl -X GET http://localhost:8080/api/admin/feedbacks \
+curl -X GET $BACKEND_URL/api/admin/feedbacks \
   -H "Authorization: Bearer $TOKEN_ALUNO"
 # Resposta: 403 Forbidden
 ```
@@ -351,7 +365,7 @@ curl -X GET http://localhost:8080/api/admin/feedbacks \
 
 ```bash
 # Feedback com nota inválida
-curl -X POST http://localhost:8080/api/feedbacks \
+curl -X POST $BACKEND_URL/api/feedbacks \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TOKEN" \
   -d '{
@@ -374,17 +388,17 @@ curl -X POST http://localhost:8080/api/feedbacks \
 Crie uma Collection no Postman com:
 
 1. **Environment Variables**:
-   - `BASE_URL`: `http://localhost:8080`
-   - `STUDENT_TOKEN`: (será preenchido automaticamente)
-   - `ADMIN_TOKEN`: (será preenchido automaticamente)
+   - `BASE_URL`: `$BACKEND_URL`
+   - `token_aluno`: (será preenchido automaticamente)
+   - `token_admin`: (será preenchido automaticamente)
 
-2. **Pre-request Script** (na Collection):
+2. **Pre-request Script**:
 ```javascript
 // Salva o token automaticamente após login
-pm.environment.set("STUDENT_TOKEN", pm.response.json().token);
+pm.environment.set("token_aluno", pm.response.json().token);
 ```
 
-3. **Authorization**: Type = Bearer Token, Token = `{{STUDENT_TOKEN}}`
+3. **Authorization**: Type = Bearer Token, Token = `{{token_aluno}}`
 
 ---
 
@@ -393,7 +407,7 @@ pm.environment.set("STUDENT_TOKEN", pm.response.json().token);
 Substitua `localhost:8080` pela URL do App Engine:
 
 ```bash
-BASE_URL="https://seu-projeto.uc.r.appspot.com"
+BASE_URL="$BACKEND_URL"
 
 curl -X POST $BASE_URL/api/auth/login \
   -H "Content-Type: application/json" \
@@ -407,7 +421,7 @@ curl -X POST $BASE_URL/api/auth/login \
 ### Notificação
 
 ```bash
-NOTIFICATION_URL="https://us-central1-seu-projeto.cloudfunctions.net/notifyAdmin"
+NOTIFICATION_URL="$NOTIFY_URL"
 
 curl -X POST $NOTIFICATION_URL \
   -H "Content-Type: application/json" \
@@ -425,7 +439,7 @@ curl -X POST $NOTIFICATION_URL \
 ### Relatório (via HTTP)
 
 ```bash
-REPORT_URL="https://us-central1-seu-projeto.cloudfunctions.net/generateReport"
+REPORT_URL="$REPORT_URL"
 
 curl -X POST $REPORT_URL
 ```
@@ -438,7 +452,7 @@ curl -X POST $REPORT_URL
 
 ```bash
 # Linux/Mac
-export TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+export TOKEN=$(curl -s -X POST $BACKEND_URL/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"maria.silva@aluno.com","password":"maria123"}' \
   | jq -r '.token')
@@ -446,7 +460,7 @@ export TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
 echo $TOKEN
 
 # Windows PowerShell
-$response = Invoke-RestMethod -Uri "http://localhost:8080/api/auth/login" `
+$response = Invoke-RestMethod -Uri "$BACKEND_URL/api/auth/login" `
   -Method Post -ContentType "application/json" `
   -Body '{"email":"maria.silva@aluno.com","password":"maria123"}'
 
@@ -457,14 +471,12 @@ $TOKEN = $response.token
 
 ```bash
 # Com jq
-curl -X GET http://localhost:8080/api/admin/stats \
+curl -X GET $BACKEND_URL/api/admin/stats \
   -H "Authorization: Bearer $TOKEN" | jq '.'
 
 # Com Python
-curl -X GET http://localhost:8080/api/admin/stats \
+curl -X GET $BACKEND_URL/api/admin/stats \
   -H "Authorization: Bearer $TOKEN" | python -m json.tool
 ```
 
 ---
-
-**🎓 Bons testes!**
