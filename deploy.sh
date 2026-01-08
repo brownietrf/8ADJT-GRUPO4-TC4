@@ -118,10 +118,11 @@ if gcloud scheduler jobs describe weekly-report-job >/dev/null 2>&1 ; then
   echo "✓ Scheduler job já existe"
 else
   gcloud scheduler jobs create pubsub weekly-report-job \
-    --schedule="0 8 * * 1" \
-    --topic=weekly-report \
-    --message-body="generate" \
-    --time-zone="America/Sao_Paulo"
+  --schedule="0 8 * * 1" \
+  --topic=weekly-report \
+  --message-body="generate" \
+  --time-zone="America/Sao_Paulo" \
+  --location=${REGION}
   echo "✓ Scheduler criado"
 fi
 
