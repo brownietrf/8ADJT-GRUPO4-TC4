@@ -38,7 +38,6 @@ echo -e "${GREEN}✓ Build concluído${NC}"
 echo -e "\n${YELLOW}[2/7] Deploy Cloud Run Backend...${NC}"
 
 gcloud run deploy ${SERVICE_NAME} \
-  --image gcr.io/${PROJECT_ID}/${SERVICE_NAME} \
   --source . \
   --platform managed \
   --region ${REGION} \
@@ -54,9 +53,11 @@ echo -e "\n${YELLOW}[3/7] Deploy Notification Function...${NC}"
 cd cloud-functions/notification-function
 
 gcloud functions deploy notifyadmin \
+  --gen2 \
   --runtime nodejs20 \
   --trigger-http \
   --allow-unauthenticated \
+  --entry-point notifyUrgentFeedback \
   --region ${REGION}
 
 cd ../..
@@ -80,9 +81,10 @@ fi
 # ==============================================================================
 echo -e "\n${YELLOW}[5/7] Deploy Weekly Report Function...${NC}"
 
-cd cloud-functions/report-function
+pushd cloud-functions/report-function
 
 gcloud functions deploy generatereport \
+  --gen2 \
   --runtime nodejs20 \
   --trigger-topic=weekly-report \
   --entry-point=generateWeeklyReport \
@@ -96,13 +98,14 @@ echo -e "${GREEN}✓ Weekly Report Function deploy concluído${NC}"
 echo -e "\n${YELLOW}[6/7] Deploy Manual Report HTTP Function...${NC}"
 
 gcloud functions deploy reporthttp \
+  --gen2 \
   --runtime nodejs20 \
   --trigger-http \
   --allow-unauthenticated \
-  --entry-point=generateManualReport \
+  --entry-point=generateWeeklyReportHttp \
   --region ${REGION}
 
-cd ../..
+popd
 
 echo -e "${GREEN}✓ Manual Report HTTP Function deploy concluído${NC}"
 
@@ -130,9 +133,9 @@ echo -e "${GREEN}            DEPLOY CONCLUÍDO COM SUCESSO!${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════════${NC}"
 
 BACKEND_URL=$(gcloud run services describe ${SERVICE_NAME} --region ${REGION} --format="value(status.url)")
-NOTIFY_URL=$(gcloud functions describe notifyadmin --region ${REGION} --format="value(httpsTrigger.url)")
+NOTIFY_URL=$(gcloud functions describe notifyadmin --region ${REGION} --format="value(serviceConfig.uri)")
 WEEKLY_URL="Pub/Sub"
-MANUAL_URL=$(gcloud functions describe reporthttp --region ${REGION} --format="value(httpsTrigger.url)")
+MANUAL_URL=$(gcloud functions describe reporthttp --region ${REGION} --format="value(serviceConfig.uri)")
 
 echo -e "\n${BLUE}🔗 URLs Final:${NC}"
 echo "Backend:             $BACKEND_URL"
